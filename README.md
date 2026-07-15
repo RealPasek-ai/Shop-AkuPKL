@@ -1,4 +1,4 @@
-# NOIR — Authentication System (Fashion Store)
+# WM. — Authentication System (Fashion Store)
 
 Modul **Authentication System** frontend-only (tanpa backend) untuk website
 Fashion Store bertema sepatu. Dibangun dengan React + Vite + Tailwind CSS +
