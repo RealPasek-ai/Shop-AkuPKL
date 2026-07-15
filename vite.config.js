@@ -1,8 +1,11 @@
 import { defineConfig } from 'vite'
-import tailwindcss from '@tailwindcss/vite'
+import react from '@vitejs/plugin-react'
 
+// Konfigurasi Vite standar untuk React
 export default defineConfig({
-  plugins: [
-    tailwindcss(),
-  ],
+  plugins: [react()],
+  server: {
+    port: 5173,
+    open: true,
+  },
 })
