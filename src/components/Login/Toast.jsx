@@ -6,7 +6,7 @@ export default function ToastContainer({ toasts, dismissToast }) {
   if (!toasts.length) return null
 
   return (
-    <div className="fixed top-5 right-5 z-[100] flex w-[90%] max-w-sm flex-col gap-2.5 sm:w-full">
+    <div className="fixed top-5 right-5 z-100 flex w-[90%] max-w-sm flex-col gap-2.5 sm:w-full">
       {toasts.map((toast) => (
         <div
           key={toast.id}
