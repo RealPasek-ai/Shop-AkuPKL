@@ -17,8 +17,8 @@ export default function Button({
 
   const variants = {
     primary: 'bg-ink text-paper hover:bg-ink-soft active:scale-[0.98]',
-    secondary: 'bg-paper text-ink border border-stone-300 hover:border-ink/50 hover:bg-paper-soft active:scale-[0.98]',
-    ghost: 'bg-transparent text-stone-500 hover:text-ink',
+    secondary: 'bg-white text-black border border-stone-300 hover:border-ink/50 hover:bg-white-soft active:scale-[0.98]',
+    ghost: 'bg-transparent text-stone-500 hover:text-black',
   }
 
   return (

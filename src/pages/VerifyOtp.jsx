@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../layouts/AuthLayout'
-import OtpInput from '../components/OtpInput'
+import OtpInput from '../components/Login/OtpInput'
 import Button from '../components/Button'
-import Alert from '../components/Alert'
-import { useCountdown } from '../hooks/useCountdown'
+import Alert from '../components/Login/Alert'
+import { useCountdown } from '../hooks/Login/useCountdown'
 import { useGlobalToast } from '../context/ToastContext'
 import { authService } from '../services/authService'
 import { storage } from '../utils/storage'
@@ -98,14 +98,14 @@ export default function VerifyOtp() {
         <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gold-dark">
           📩 Simulasi Email
         </p>
-        <p className="text-sm text-ink-soft">
+        <p className="text-sm text-black-soft">
           Kode OTP Anda adalah:{' '}
-          <span className="text-lg font-bold tracking-[0.2em] text-ink">
+          <span className="text-lg font-bold tracking-[0.2em] text-black">
             {otpPayload?.code || '------'}
           </span>
         </p>
         <p className="mt-1.5 text-xs text-stone-500">
-          Pada aplikasi sebenarnya, kode ini dikirim melalui email ke <strong className="text-ink-soft">{email}</strong>.
+          Pada aplikasi sebenarnya, kode ini dikirim melalui email ke <strong className="text-black-soft">{email}</strong>.
         </p>
       </div>
 

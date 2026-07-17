@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../layouts/AuthLayout'
-import Input from '../components/Input'
+import Input from '../components/Login/Input'
 import Button from '../components/Button'
-import Alert from '../components/Alert'
+import Alert from '../components/Login/Alert'
 import Card from '../components/Card'
-import Modal from '../components/Modal'
-import { useAuth } from '../hooks/useAuth'
+import Modal from '../components/Login/Modal'
+import { useAuth } from '../hooks/Login/useAuth'
 import { useGlobalToast } from '../context/ToastContext'
 import { validateEmail, validatePassword } from '../utils/validation'
 
@@ -61,7 +61,9 @@ export default function Login() {
         login({ email: form.email, password: form.password, rememberMe: form.rememberMe })
         showToast('Berhasil masuk. Selamat datang kembali!', 'success')
         setIsLoading(false)
+        navigate('/UserProfile')
       } catch (err) {
+
         if (err.code === 'UNVERIFIED') {
           navigate('/verify-otp')
           return
@@ -94,7 +96,7 @@ export default function Login() {
               {currentUser.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="text-base font-semibold text-ink">{currentUser.name}</p>
+              <p className="text-base font-semibold text-black">{currentUser.name}</p>
               <p className="text-sm text-stone-500">{currentUser.email}</p>
             </div>
           </div>
@@ -102,7 +104,7 @@ export default function Login() {
           <div className="space-y-3 border-t border-stone-200 pt-5 text-sm">
             <div className="flex items-center justify-between">
               <span className="text-stone-500">Tanggal Registrasi</span>
-              <span className="font-medium text-ink">{joinDate}</span>
+              <span className="font-medium text-black">{joinDate}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-stone-500">Status Verifikasi</span>
@@ -174,11 +176,11 @@ export default function Login() {
               type="checkbox"
               checked={form.rememberMe}
               onChange={(e) => handleChange('rememberMe', e.target.checked)}
-              className="h-4 w-4 rounded border-stone-300 bg-paper accent-gold"
+              className="h-4 w-4 rounded border-stone-300 bg-white accent-gold"
             />
             Ingat Saya
           </label>
-          <Link to="/forgot-password" className="text-sm text-ink-soft hover:text-gold hover:underline">
+          <Link to="/forgot-password" className="text-sm text-black-soft hover:text-gold hover:underline">
             Lupa password?
           </Link>
         </div>

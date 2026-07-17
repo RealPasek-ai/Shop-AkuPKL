@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../layouts/AuthLayout'
-import Input from '../components/Input'
+import Input from '../components/Login/Input'
 import Button from '../components/Button'
-import Alert from '../components/Alert'
+import Alert from '../components/Login/Alert'
 import PasswordStrength from '../components/PasswordStrength'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../hooks/Login/useAuth'
 import { useGlobalToast } from '../context/ToastContext'
 import {
   validateName,

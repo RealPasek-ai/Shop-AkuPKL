@@ -13,8 +13,8 @@ export default function Modal({ isOpen, onClose, title, children }) {
         onClick={onClose}
       />
       {/* Content */}
-      <div className="relative z-10 w-full max-w-sm rounded-2xl border border-stone-200 bg-paper p-6 shadow-2xl animate-slideDown">
-        {title && <h3 className="mb-3 text-lg font-semibold text-ink">{title}</h3>}
+      <div className="relative z-10 w-full max-w-sm rounded-2xl border border-stone-200 bg-white p-6 shadow-2xl animate-slideDown">
+        {title && <h3 className="mb-3 text-lg font-semibold text-black">{title}</h3>}
         {children}
       </div>
     </div>

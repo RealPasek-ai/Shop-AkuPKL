@@ -7,13 +7,13 @@ import { Link } from 'react-router-dom'
  */
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-paper px-6 text-center">
-      <Link to="/login" className="mb-10 font-display text-2xl font-bold tracking-wider text-ink">
+    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-white px-6 text-center">
+      <Link to="/login" className="mb-10 font-swap text-2xl font-bold tracking-wider text-black">
         NOIR<span className="text-gold">.</span>
       </Link>
 
-      <p className="font-display text-8xl font-extrabold text-stone-200 sm:text-9xl">404</p>
-      <h1 className="-mt-6 text-2xl font-bold text-ink sm:text-3xl">Halaman Tidak Ditemukan</h1>
+      <p className="font-swap text-8xl font-extrabold text-stone-200 sm:text-9xl">404</p>
+      <h1 className="-mt-6 text-2xl font-bold text-black sm:text-3xl">Halaman Tidak Ditemukan</h1>
       <p className="mt-3 max-w-sm text-sm text-stone-500">
         Sepertinya langkah Anda membawa ke tempat yang salah. Mari kembali ke jalur yang benar.
       </p>

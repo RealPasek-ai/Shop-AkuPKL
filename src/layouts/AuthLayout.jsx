@@ -9,22 +9,22 @@ import { Link } from 'react-router-dom'
  */
 export default function AuthLayout({ title, subtitle, children }) {
   return (
-    <div className="flex min-h-screen w-full bg-paper">
+    <div className="flex min-h-screen w-full bg-white">
       {/* Sisi Form */}
       <div className="flex w-full flex-col justify-center px-6 py-12 sm:px-12 lg:w-[55%] lg:px-20 xl:px-28">
-        <Link to="/" className="mb-10 font-display text-2xl font-bold tracking-wider text-ink">
+        <Link to="/" className="mb-10 font-swap text-2xl font-bold tracking-wider text-black">
           W<span className="text-gold">M.</span>
         </Link>
 
         <div className="w-full max-w-md">
-          {title && <h1 className="mb-2 text-2xl font-bold text-ink sm:text-3xl">{title}</h1>}
+          {title && <h1 className="mb-2 text-2xl font-bold text-black sm:text-3xl">{title}</h1>}
           {subtitle && <p className="mb-8 text-sm text-stone-500">{subtitle}</p>}
           {children}
         </div>
       </div>
 
       {/* Sisi Editorial - signature visual, disembunyikan di mobile */}
-      <div className="relative hidden overflow-hidden bg-paper-soft lg:block lg:w-[45%]">
+      <div className="relative hidden overflow-hidden bg-white-soft lg:block lg:w-[45%]">
         {/* Garis jahitan gold sebagai pembatas panel - motif jahitan sepatu kulit */}
         <div className="absolute inset-y-0 left-0 w-px border-l border-dashed border-gold/40" />
 
@@ -36,7 +36,7 @@ export default function AuthLayout({ title, subtitle, children }) {
          
 
           <div>
-            <p className="font-display text-4xl font-bold leading-tight text-ink xl:text-5xl">
+            <p className="font-swap text-4xl font-bold leading-tight text-black xl:text-5xl">
               Setiap
               <br />
               Outfit

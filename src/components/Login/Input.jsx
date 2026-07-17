@@ -24,7 +24,7 @@ export default function Input({
   return (
     <div className="w-full">
       {label && (
-        <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-ink-soft">
+        <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-black-soft">
           {label}
         </label>
       )}
@@ -38,7 +38,7 @@ export default function Input({
           onBlur={onBlur}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className={`w-full rounded-lg border bg-paper px-4 py-3 text-sm text-ink placeholder-stone-400 transition-colors duration-200 focus:border-gold focus-visible:ring-0 ${
+          className={`w-full rounded-lg border bg-white px-4 py-3 text-sm text-black placeholder-stone-400 transition-colors duration-200 focus:border-gold focus-visible:ring-0 ${
             error ? 'border-red-400' : 'border-stone-300'
           } ${isPassword ? 'pr-11' : ''}`}
         />
@@ -47,7 +47,7 @@ export default function Input({
             type="button"
             tabIndex={-1}
             onClick={() => setShowPassword((s) => !s)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-ink"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-black"
             aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
           >
             {showPassword ? <EyeOffIcon /> : <EyeIcon />}

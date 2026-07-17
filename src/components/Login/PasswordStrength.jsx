@@ -23,7 +23,7 @@ export default function PasswordStrength({ password }) {
         ))}
       </div>
       <p className="mt-1 text-xs text-stone-500">
-        Kekuatan password: <span className="text-ink-soft">{PASSWORD_STRENGTH_LABELS[strength]}</span>
+        Kekuatan password: <span className="text-black-soft">{PASSWORD_STRENGTH_LABELS[strength]}</span>
       </p>
     </div>
   )

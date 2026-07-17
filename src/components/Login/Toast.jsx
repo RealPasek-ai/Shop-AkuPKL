@@ -15,13 +15,13 @@ export default function ToastContainer({ toasts, dismissToast }) {
               ? 'border-green-200 bg-green-50/95 text-green-700'
               : toast.type === 'error'
               ? 'border-red-200 bg-red-50/95 text-red-700'
-              : 'border-stone-200 bg-paper/95 text-ink-soft'
+              : 'border-stone-200 bg-white/95 text-black-soft'
           }`}
         >
           <span>{toast.message}</span>
           <button
             onClick={() => dismissToast(toast.id)}
-            className="text-stone-400 hover:text-ink"
+            className="text-stone-400 hover:text-black"
             aria-label="Tutup notifikasi"
           >
             ✕

@@ -8,7 +8,7 @@ export default function Alert({ type = 'error', message }) {
   const styles = {
     error: 'border-red-200 bg-red-50 text-red-700',
     success: 'border-green-200 bg-green-50 text-green-700',
-    info: 'border-gold/30 bg-gold-soft/60 text-ink-soft',
+    info: 'border-gold/30 bg-gold-soft/60 text-black-soft',
   }
 
   const icons = {
