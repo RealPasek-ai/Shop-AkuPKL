@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* Token desain kustom untuk tema NOIR (Tailwind v4).
+   Mendefinisikan warna paper/ink/gold dan font display/body sehingga
+   utility seperti bg-paper, text-ink, ring-gold, font-display bisa dipakai. */
+@theme {
+  --color-paper: #faf7f2;
+  --color-ink: #14110f;
+  --color-gold: #c5a572;
+
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-stone-200;
+  }
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+  /* Focus ring konsisten untuk aksesibilitas, memakai aksen gold */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    @apply outline-none ring-2 ring-gold/60 ring-offset-2 ring-offset-paper;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
