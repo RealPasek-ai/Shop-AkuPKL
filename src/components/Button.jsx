@@ -1,6 +1,7 @@
 /**
  * components/Button.jsx
- * Tombol reusable dengan varian, loading state, dan disable saat submit.
+ * Tombol reusable bergaya editorial (seperti btn-solid/btn-invert Home):
+ * kotak (tanpa rounded), huruf kapital ter-spasi, dan efek invert saat hover.
  */
 export default function Button({
   children,
@@ -13,12 +14,12 @@ export default function Button({
   fullWidth = true,
 }) {
   const base =
-    'inline-flex items-center justify-center gap-2 rounded-lg font-semibold text-sm px-5 py-3 transition-all duration-200 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50'
+    'inline-flex items-center justify-center gap-2 border px-6 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50'
 
   const variants = {
-    primary: 'bg-ink text-paper hover:bg-ink-soft active:scale-[0.98]',
-    secondary: 'bg-paper text-ink border border-stone-300 hover:border-ink/50 hover:bg-paper-soft active:scale-[0.98]',
-    ghost: 'bg-transparent text-stone-500 hover:text-ink',
+    primary: 'border-ink bg-ink text-white hover:bg-white hover:text-ink',
+    secondary: 'border-ink bg-white text-ink hover:bg-ink hover:text-white',
+    ghost: 'border-transparent bg-transparent text-smoke hover:text-ink',
   }
 
   return (

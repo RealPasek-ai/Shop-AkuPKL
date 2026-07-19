@@ -3,15 +3,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import Card from "../../components/Card";
 import useFetch from "../../hooks/useFetch";
 import { fetchStatusPesanan } from "../../services/pembayaranApi";
+import { formatRupiah } from "../../utils/format";
 
-const NAMA_TOKO = "TOKOKU";
+const NAMA_TOKO = "WM.";
 
 const alasanBatal = [
-  "Selected the wrong payment method",
-  "Want to change the shipping address",
-  "Changed my mind",
-  "Found a cheaper price elsewhere",
-  "Other",
+  "Salah memilih metode pembayaran",
+  "Ingin mengubah alamat pengiriman",
+  "Berubah pikiran",
+  "Menemukan harga lebih murah di tempat lain",
+  "Lainnya",
 ];
 
 export default function StatusPembayaran() {
@@ -44,9 +45,9 @@ export default function StatusPembayaran() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F1EA]">
-      <header className="border-b border-stone-300/60 bg-white py-4 text-center">
-        <h1 className="text-xl font-bold tracking-[0.2em] text-stone-900">{NAMA_TOKO}</h1>
+    <div className="min-h-screen bg-cloud">
+      <header className="border-b border-ash/60 bg-white py-4 text-center">
+        <h1 className="text-xl font-bold tracking-[0.2em] text-ink">{NAMA_TOKO}</h1>
       </header>
 
       <div className="mx-auto max-w-md px-6 py-10">
@@ -54,11 +55,11 @@ export default function StatusPembayaran() {
           {/* --- Loading state --- */}
           {loading && (
             <>
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-stone-300 bg-stone-50">
-                <span className="h-6 w-6 animate-spin rounded-full border-2 border-stone-400 border-t-transparent" />
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-ash bg-cloud">
+                <span className="h-6 w-6 animate-spin rounded-full border-2 border-steel border-t-transparent" />
               </div>
-              <h2 className="mb-2 text-lg font-semibold text-stone-900">Checking payment status...</h2>
-              <p className="text-sm text-stone-500">Please wait a moment.</p>
+              <h2 className="mb-2 text-lg font-semibold text-ink">Mengecek status pembayaran...</h2>
+              <p className="text-sm text-smoke">Mohon tunggu sebentar.</p>
             </>
           )}
 
@@ -68,14 +69,14 @@ export default function StatusPembayaran() {
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-red-300 bg-red-50 text-2xl text-red-700">
                 ⚠️
               </div>
-              <h2 className="mb-2 text-lg font-semibold text-stone-900">Something went wrong</h2>
-              <p className="mb-6 text-sm text-stone-500">{error}</p>
+              <h2 className="mb-2 text-lg font-semibold text-ink">Terjadi kesalahan</h2>
+              <p className="mb-6 text-sm text-smoke">{error}</p>
               <button
                 type="button"
                 onClick={refetch}
-                className="w-full rounded-md bg-stone-900 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-800 active:scale-[0.98]"
+                className="w-full bg-ink py-2.5 border border-ink text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-ink active:scale-[0.98]"
               >
-                Try again
+                Coba lagi
               </button>
             </>
           )}
@@ -91,66 +92,66 @@ export default function StatusPembayaran() {
                 }`}
               >
                 {mengecekUlang ? (
-                  <span className="h-6 w-6 animate-spin rounded-full border-2 border-stone-400 border-t-transparent" />
+                  <span className="h-6 w-6 animate-spin rounded-full border-2 border-steel border-t-transparent" />
                 ) : status === "gagal" ? (
                   "✕"
                 ) : (
                   "✅"
                 )}
               </div>
-              <h2 className="mb-2 text-lg font-semibold text-stone-900">
-                {status === "gagal" ? "Payment cancelled" : "Payment successful"}
+              <h2 className="mb-2 text-lg font-semibold text-ink">
+                {status === "gagal" ? "Pembayaran dibatalkan" : "Pembayaran berhasil"}
               </h2>
-              <p className="mb-6 text-sm text-stone-500">
+              <p className="mb-6 text-sm text-smoke">
                 {status === "gagal"
-                  ? "Your payment has been cancelled. You can try paying again anytime."
-                  : "Thank you! We've received your order and it will be processed shortly."}
+                  ? "Pembayaranmu telah dibatalkan. Kamu bisa mencoba membayar lagi kapan saja."
+                  : "Terima kasih! Pesananmu sudah kami terima dan akan segera diproses."}
               </p>
 
-              <div className="mb-6 space-y-2 rounded-md bg-stone-50 p-4 text-left text-sm">
+              <div className="mb-6 space-y-2 bg-cloud p-4 text-left text-sm">
                 <div className="flex justify-between">
-                  <span className="text-stone-500">Order number</span>
-                  <span className="font-medium text-stone-800">#{pesanan.orderId}</span>
+                  <span className="text-smoke">Nomor pesanan</span>
+                  <span className="font-medium text-ink-soft">#{pesanan.orderId}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-stone-500">Subtotal</span>
-                  <span className="font-medium text-stone-800">
-                    {pesanan.subtotal.toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 })}
+                  <span className="text-smoke">Subtotal</span>
+                  <span className="font-medium text-ink-soft">
+                    {formatRupiah(pesanan.subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-stone-500">Shipping</span>
-                  <span className="font-medium text-stone-800">
-                    {pesanan.ongkir.toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 })}
+                  <span className="text-smoke">Pengiriman</span>
+                  <span className="font-medium text-ink-soft">
+                    {formatRupiah(pesanan.ongkir)}
                   </span>
                 </div>
-                <div className="flex justify-between border-t border-stone-200 pt-2">
-                  <span className="text-stone-500">Total paid</span>
-                  <span className="font-medium text-stone-800">
-                    {pesanan.total.toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 })}
+                <div className="flex justify-between border-t border-ash pt-2">
+                  <span className="text-smoke">Total dibayar</span>
+                  <span className="font-medium text-ink-soft">
+                    {formatRupiah(pesanan.total)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-stone-500">Method</span>
-                  <span className="font-medium text-stone-800">{pesanan.metode}</span>
+                  <span className="text-smoke">Metode</span>
+                  <span className="font-medium text-ink-soft">{pesanan.metode}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-stone-500">Time</span>
-                  <span className="font-medium text-stone-800">{pesanan.waktu}</span>
+                  <span className="text-smoke">Waktu</span>
+                  <span className="font-medium text-ink-soft">{pesanan.waktu}</span>
                 </div>
               </div>
 
               {showBatal ? (
-                <div className="mb-4 animate-slidefade space-y-2 rounded-md border border-stone-200 bg-stone-50 p-4 text-left">
-                  <p className="mb-2 text-sm font-medium text-stone-800">Why do you want to cancel this payment?</p>
+                <div className="mb-4 animate-slidefade space-y-2 border border-ash bg-cloud p-4 text-left">
+                  <p className="mb-2 text-sm font-medium text-ink-soft">Kenapa kamu ingin membatalkan pembayaran ini?</p>
                   {alasanBatal.map((alasan) => (
-                    <label key={alasan} className="flex cursor-pointer items-center gap-2 text-sm text-stone-600">
+                    <label key={alasan} className="flex cursor-pointer items-center gap-2 text-sm text-smoke">
                       <input
                         type="radio"
                         name="alasanBatal"
                         checked={alasanTerpilih === alasan}
                         onChange={() => setAlasanTerpilih(alasan)}
-                        className="h-3.5 w-3.5 accent-stone-900"
+                        className="h-3.5 w-3.5 accent-ink"
                       />
                       {alasan}
                     </label>
@@ -159,17 +160,17 @@ export default function StatusPembayaran() {
                     <button
                       type="button"
                       onClick={() => setShowBatal(false)}
-                      className="flex-1 rounded-md border border-stone-300 bg-white py-2 text-sm font-medium text-stone-600 transition hover:bg-stone-100"
+                      className="flex-1 border border-ink bg-white py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:bg-ink hover:text-white"
                     >
-                      Cancel
+                      Batal
                     </button>
                     <button
                       type="button"
                       onClick={konfirmasiBatal}
                       disabled={!alasanTerpilih}
-                      className="flex-1 rounded-md bg-red-600 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+                      className="flex-1 border border-red-600 bg-red-600 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-red-600 disabled:opacity-50"
                     >
-                      Confirm cancellation
+                      Konfirmasi pembatalan
                     </button>
                   </div>
                 </div>
@@ -179,9 +180,9 @@ export default function StatusPembayaran() {
                     <button
                       type="button"
                       onClick={() => navigate(`/invoice/${pesanan.orderId}`)}
-                      className="w-full rounded-md bg-stone-900 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-800 active:scale-[0.98]"
+                      className="w-full bg-ink py-2.5 border border-ink text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-ink active:scale-[0.98]"
                     >
-                      View invoice
+                      Lihat invoice
                     </button>
                   )}
 
@@ -189,35 +190,35 @@ export default function StatusPembayaran() {
                     <button
                       type="button"
                       onClick={() => navigate("/pembayaran/pilih")}
-                      className="w-full rounded-md bg-stone-900 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-800 active:scale-[0.98]"
+                      className="w-full bg-ink py-2.5 border border-ink text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-ink active:scale-[0.98]"
                     >
-                      Try paying again
+                      Coba bayar lagi
                     </button>
                   )}
 
                   <button
                     type="button"
                     onClick={() => navigate(-1)}
-                    className="mt-3 w-full rounded-md border border-stone-300 bg-white py-2.5 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+                    className="mt-3 w-full border border-ink bg-white py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:bg-ink hover:text-white"
                   >
-                    ‹ Back to previous page
+                    ‹ Kembali ke halaman sebelumnya
                   </button>
 
                   <button
                     type="button"
                     onClick={() => navigate("/")}
-                    className="mt-4 w-full text-sm font-medium text-stone-500 underline underline-offset-2 transition hover:text-stone-700"
+                    className="mt-4 w-full text-sm font-medium text-smoke underline underline-offset-2 transition hover:text-ink-soft"
                   >
-                    Back to home
+                    Kembali ke beranda
                   </button>
 
                   {status !== "gagal" && (
                     <button
                       type="button"
                       onClick={() => setShowBatal(true)}
-                      className="mt-2 w-full text-xs text-stone-400 underline underline-offset-2 transition hover:text-red-500"
+                      className="mt-2 w-full text-xs text-steel underline underline-offset-2 transition hover:text-red-500"
                     >
-                      Cancel payment
+                      Batalkan pembayaran
                     </button>
                   )}
                 </>

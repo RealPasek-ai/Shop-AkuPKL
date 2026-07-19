@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import AuthLayout from '../layouts/AuthLayout'
-import Input from '../components/Input'
+import Input from '../components/Login/Input'
 import Button from '../components/Button'
-import Alert from '../components/Alert'
+import Alert from '../components/Login/Alert'
 import Card from '../components/Card'
-import Modal from '../components/Modal'
-import { useAuth } from '../hooks/useAuth'
+import Modal from '../components/Login/Modal'
+import { useAuth } from '../hooks/Login/useAuth'
 import { useGlobalToast } from '../context/ToastContext'
 import { validateEmail, validatePassword } from '../utils/validation'
 
@@ -24,6 +24,7 @@ export default function Login() {
   const { login, logout, currentUser, isAuthenticated } = useAuth()
   const { showToast } = useGlobalToast()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const [form, setForm] = useState({ email: '', password: '', rememberMe: false })
   const [errors, setErrors] = useState({})
@@ -61,7 +62,9 @@ export default function Login() {
         login({ email: form.email, password: form.password, rememberMe: form.rememberMe })
         showToast('Berhasil masuk. Selamat datang kembali!', 'success')
         setIsLoading(false)
+        navigate(location.state?.from || '/', { replace: true })
       } catch (err) {
+
         if (err.code === 'UNVERIFIED') {
           navigate('/verify-otp')
           return
@@ -90,22 +93,22 @@ export default function Login() {
       <AuthLayout title="Anda Sudah Masuk" subtitle="Sesi login Anda sedang aktif.">
         <Card>
           <div className="mb-6 flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-ink text-lg font-bold text-paper">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-ink text-lg font-bold text-white">
               {currentUser.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="text-base font-semibold text-ink">{currentUser.name}</p>
-              <p className="text-sm text-stone-500">{currentUser.email}</p>
+              <p className="text-base font-semibold text-black">{currentUser.name}</p>
+              <p className="text-sm text-smoke">{currentUser.email}</p>
             </div>
           </div>
 
-          <div className="space-y-3 border-t border-stone-200 pt-5 text-sm">
+          <div className="space-y-3 border-t border-ash pt-5 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-stone-500">Tanggal Registrasi</span>
-              <span className="font-medium text-ink">{joinDate}</span>
+              <span className="text-smoke">Tanggal Registrasi</span>
+              <span className="font-medium text-black">{joinDate}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-stone-500">Status Verifikasi</span>
+              <span className="text-smoke">Status Verifikasi</span>
               <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
                 Terverifikasi
@@ -113,7 +116,7 @@ export default function Login() {
             </div>
           </div>
 
-          <Button variant="primary" onClick={() => navigate('/UserProfile')} className="mt-6">
+          <Button variant="primary" onClick={() => navigate('/akun')} className="mt-6">
             Masuk ke Akun Saya
           </Button>
           <Button variant="secondary" onClick={() => setShowLogoutModal(true)} className="mt-3">
@@ -126,7 +129,7 @@ export default function Login() {
           onClose={() => setShowLogoutModal(false)}
           title="Konfirmasi Keluar"
         >
-          <p className="mb-6 text-sm text-stone-500">
+          <p className="mb-6 text-sm text-smoke">
             Apakah Anda yakin ingin keluar dari akun Anda?
           </p>
           <div className="flex gap-3">
@@ -172,16 +175,16 @@ export default function Login() {
         />
 
         <div className="flex items-center justify-between pt-1">
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-stone-500">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-smoke">
             <input
               type="checkbox"
               checked={form.rememberMe}
               onChange={(e) => handleChange('rememberMe', e.target.checked)}
-              className="h-4 w-4 rounded border-stone-300 bg-paper accent-gold"
+              className="h-4 w-4 border-ash bg-white accent-ink"
             />
             Ingat Saya
           </label>
-          <Link to="/forgot-password" className="text-sm text-ink-soft hover:text-gold hover:underline">
+          <Link to="/forgot-password" className="text-sm text-ink-soft hover:text-ink hover:underline">
             Lupa password?
           </Link>
         </div>
@@ -191,9 +194,9 @@ export default function Login() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-stone-500">
+      <p className="mt-6 text-center text-sm text-smoke">
         Belum punya akun?{' '}
-        <Link to="/register" className="font-medium text-gold hover:underline">
+        <Link to="/register" className="font-medium text-ink hover:underline">
           Daftar sekarang
         </Link>
       </p>

@@ -44,8 +44,8 @@ export default function OtpInput({ value, onChange, error }) {
             onKeyDown={(e) => handleKeyDown(i, e)}
             inputMode="numeric"
             maxLength={1}
-            className={`h-12 w-full max-w-[3rem] rounded-lg border bg-paper text-center text-lg font-semibold text-ink transition-colors focus:border-gold ${
-              error ? 'border-red-400' : 'border-stone-300'
+            className={`h-12 w-full max-w-[3rem] border bg-white text-center text-lg font-semibold text-black transition-colors focus:border-ink ${
+              error ? 'border-red-400' : 'border-ash'
             }`}
           />
         ))}

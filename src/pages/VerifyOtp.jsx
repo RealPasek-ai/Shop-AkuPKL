@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AuthLayout from '../layouts/AuthLayout'
-import OtpInput from '../components/OtpInput'
+import OtpInput from '../components/Login/OtpInput'
 import Button from '../components/Button'
-import Alert from '../components/Alert'
-import { useCountdown } from '../hooks/useCountdown'
+import Alert from '../components/Login/Alert'
+import { useCountdown } from '../hooks/Login/useCountdown'
 import { useGlobalToast } from '../context/ToastContext'
 import { authService } from '../services/authService'
 import { storage } from '../utils/storage'
@@ -94,17 +94,17 @@ export default function VerifyOtp() {
       subtitle="Masukkan 6 digit kode OTP untuk melanjutkan."
     >
       {/* Simulasi Email Box */}
-      <div className="mb-6 rounded-xl border border-dashed border-gold/40 bg-gold-soft/40 p-4 animate-fadeIn">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gold-dark">
+      <div className="mb-6 border border-dashed border-ink/40 bg-cloud/40 p-4 animate-fadeIn">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ink-soft">
           📩 Simulasi Email
         </p>
         <p className="text-sm text-ink-soft">
           Kode OTP Anda adalah:{' '}
-          <span className="text-lg font-bold tracking-[0.2em] text-ink">
+          <span className="text-lg font-bold tracking-[0.2em] text-black">
             {otpPayload?.code || '------'}
           </span>
         </p>
-        <p className="mt-1.5 text-xs text-stone-500">
+        <p className="mt-1.5 text-xs text-smoke">
           Pada aplikasi sebenarnya, kode ini dikirim melalui email ke <strong className="text-ink-soft">{email}</strong>.
         </p>
       </div>
@@ -115,14 +115,14 @@ export default function VerifyOtp() {
         <OtpInput value={code} onChange={setCode} error="" />
 
         <div className="flex items-center justify-between text-sm">
-          <span className={isExpired ? 'text-red-500' : 'text-stone-500'}>
+          <span className={isExpired ? 'text-red-500' : 'text-smoke'}>
             {isExpired ? 'Kode OTP kadaluarsa' : `Kode berlaku: ${formatted}`}
           </span>
           <button
             type="button"
             onClick={handleGenerateNewOtp}
             disabled={isResending}
-            className="font-medium text-gold hover:underline disabled:opacity-50"
+            className="font-medium text-ink hover:underline disabled:opacity-50"
           >
             {isResending ? 'Mengirim...' : 'Generate OTP Baru'}
           </button>

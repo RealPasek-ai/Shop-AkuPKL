@@ -1,6 +1,6 @@
 import AppRoutes from './routes/AppRoutes'
-import Loading from './components/Loading'
-import { useAuth } from './hooks/useAuth'
+import Loading from './components/Login/Loading'
+import { useAuth } from './hooks/Login/useAuth'
 
 /**
  * App.jsx

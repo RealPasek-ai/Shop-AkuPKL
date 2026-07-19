@@ -1,9 +1,13 @@
 import Swal from "sweetalert2";
+import { authService } from "../../services/authService";
 
-
-export const handleLogout = (setUser) => {
-  setUser(null);
-  window.location.href = "/login";
+export const handleLogout = () => {
+  authService.logout();                 // hapus sesi login (fashion_session)
+  localStorage.removeItem("userData");  // hapus data profil dashboard
+  // Reload penuh ke Beranda -> seluruh state login ter-reset;
+  // refresh berikutnya tetap dalam keadaan logout. (Tidak memanggil setUser
+  // agar useUser tidak menulis ulang "null" ke localStorage.)
+  window.location.href = "/";
 };
 
 
@@ -22,7 +26,7 @@ export const handleHapusAkun = (setUser) => {
     if (result.isConfirmed) {
       localStorage.clear();
       setUser(null);
-      window.location.href = "/login";
+      window.location.href = "/";
     }
   });
 };

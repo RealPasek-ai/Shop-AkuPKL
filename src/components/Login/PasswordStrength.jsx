@@ -1,4 +1,4 @@
-import { getPasswordStrength, PASSWORD_STRENGTH_LABELS } from '../utils/validation'
+import { getPasswordStrength, PASSWORD_STRENGTH_LABELS } from '../../utils/validation'
 
 /**
  * components/PasswordStrength.jsx
@@ -17,12 +17,12 @@ export default function PasswordStrength({ password }) {
           <div
             key={i}
             className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-              i < strength ? colors[strength] : 'bg-stone-200'
+              i < strength ? colors[strength] : 'bg-ash'
             }`}
           />
         ))}
       </div>
-      <p className="mt-1 text-xs text-stone-500">
+      <p className="mt-1 text-xs text-smoke">
         Kekuatan password: <span className="text-ink-soft">{PASSWORD_STRENGTH_LABELS[strength]}</span>
       </p>
     </div>

@@ -1,12 +1,25 @@
 @import "tailwindcss";
 
-/* Token desain kustom untuk tema NOIR (Tailwind v4).
-   Mendefinisikan warna paper/ink/gold dan font display/body sehingga
-   utility seperti bg-paper, text-ink, ring-gold, font-display bisa dipakai. */
+/* ---------------------------------------------------------------------------
+   Token desain (Tailwind v4 memakai konfigurasi CSS-first lewat @theme).
+   Semua utility seperti bg-paper, text-smoke, font-display dibangkitkan
+   dari variabel di bawah ini — tanpa ini, class tersebut tidak dikenali.
+   --------------------------------------------------------------------------- */
 @theme {
+  /* Palet NOIR — dipakai halaman auth (hangat, beraksen gold) */
   --color-paper: #faf7f2;
+  --color-paper-soft: #f2ece1;
   --color-ink: #14110f;
+  --color-ink-soft: #4a443f;
   --color-gold: #c5a572;
+  --color-gold-soft: #f5eddd;
+  --color-gold-dark: #8a6d3b;
+
+  /* Palet monokrom — dipakai storefront/dashboard (cloud paling terang → smoke paling gelap) */
+  --color-cloud: #f4f4f5;
+  --color-ash: #e4e4e7;
+  --color-steel: #a1a1aa;
+  --color-smoke: #71717a;
 
   --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -14,19 +27,36 @@
 
 @layer base {
   * {
-    @apply border-stone-200;
+    @apply border-ash;
   }
   body {
-    @apply bg-paper text-ink font-body antialiased;
+    @apply bg-white text-ink font-body antialiased;
   }
   h1, h2, h3, h4 {
     @apply font-display;
   }
-  /* Focus ring konsisten untuk aksesibilitas, memakai aksen gold */
+  /* Focus ring konsisten untuk aksesibilitas — monokrom (ink) */
   a:focus-visible,
   button:focus-visible,
   input:focus-visible {
-    @apply outline-none ring-2 ring-gold/60 ring-offset-2 ring-offset-paper;
+    @apply outline-none ring-2 ring-ink/40 ring-offset-2 ring-offset-white;
+  }
+}
+
+@layer components {
+  /* Label kecil huruf kapital di atas judul seksi */
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.2em];
+  }
+  /* Judul editorial besar */
+  .heading-display {
+    @apply font-display font-black leading-[0.95] tracking-tight;
+  }
+  .btn-solid {
+    @apply inline-flex items-center justify-center border border-black bg-black px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white transition-colors hover:bg-white hover:text-black;
+  }
+  .btn-invert {
+    @apply inline-flex items-center justify-center border border-black bg-white px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-black transition-colors hover:bg-black hover:text-white;
   }
 }
 
@@ -34,4 +64,94 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Marquee ticker — bergerak terus-menerus (track digandakan, geser -50% untuk loop mulus). */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Marquee vertikal — untuk kolom gambar produk di Hero. */
+@keyframes marquee-y {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+.animate-marquee-y {
+  animation: marquee-y 22s linear infinite;
+}
+
+/* Saat slider tile sedang digeser (drag/momentum). */
+.is-dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+
+/* ---------------------------------------------------------------------------
+   SweetAlert2 — samakan dengan bahasa visual editorial (mono, tajam, datar).
+   Ditulis sebagai CSS biasa dengan !important agar menimpa gaya bawaan
+   SweetAlert, warna tombol inline (confirmButtonColor), maupun customClass
+   Tailwind lama di util. Warna IKON status (sukses/peringatan/error) sengaja
+   TIDAK diubah agar sinyal tetap terbaca.
+   --------------------------------------------------------------------------- */
+.swal2-popup {
+  border-radius: 0 !important;
+  border: 1px solid var(--color-ash) !important;
+  box-shadow: none !important;
+  font-family: var(--font-body) !important;
+  color: var(--color-ink) !important;
+}
+.swal2-title {
+  font-family: var(--font-display) !important;
+  color: var(--color-ink) !important;
+}
+.swal2-html-container {
+  color: var(--color-smoke) !important;
+}
+.swal2-input,
+.swal2-textarea,
+.swal2-select,
+.swal2-file {
+  border-radius: 0 !important;
+  border: 1px solid var(--color-ash) !important;
+  box-shadow: none !important;
+  color: var(--color-ink) !important;
+}
+.swal2-input:focus,
+.swal2-textarea:focus {
+  border-color: var(--color-ink) !important;
+  box-shadow: none !important;
+}
+/* Tombol confirm/cancel — kotak, kapital, invert saat hover (btn-solid/invert) */
+.swal2-confirm,
+.swal2-cancel,
+.swal2-deny {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  transition: background-color 0.15s, color 0.15s;
+}
+.swal2-confirm {
+  background-color: var(--color-ink) !important;
+  border: 1px solid var(--color-ink) !important;
+  color: #fff !important;
+}
+.swal2-confirm:hover {
+  background-color: #fff !important;
+  color: var(--color-ink) !important;
+}
+.swal2-cancel {
+  background-color: #fff !important;
+  border: 1px solid var(--color-ink) !important;
+  color: var(--color-ink) !important;
+}
+.swal2-cancel:hover {
+  background-color: var(--color-ink) !important;
+  color: #fff !important;
 }

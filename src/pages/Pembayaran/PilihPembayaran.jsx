@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Card from "../../components/Card";
+import { formatRupiah } from "../../utils/format";
+import { useCart } from "../../context/CartContext";
+import { simpanOrder } from "../../utils/orderStore";
 
 function buatOrderId() {
   const now = new Date();
@@ -9,15 +12,15 @@ function buatOrderId() {
   return `${tanggal}-${acak}`;
 }
 
-const NAMA_TOKO = "TOKOKU";
+const NAMA_TOKO = "WM.";
 
-const langkahCheckout = ["Cart", "Information", "Shipping", "Payment"];
+const langkahCheckout = ["Keranjang", "Informasi", "Pengiriman", "Pembayaran"];
 
 const metodeBayar = [
-  { id: "transfer", label: "Bank transfer", deskripsi: "BCA, Mandiri, BNI, BRI", icon: "🏦" },
+  { id: "transfer", label: "Transfer Bank", deskripsi: "BCA, Mandiri, BNI, BRI", icon: "🏦" },
   { id: "ewallet", label: "E-wallet", deskripsi: "GoPay, OVO, DANA, ShopeePay", icon: "📱" },
-  { id: "kartu", label: "Debit / credit card", deskripsi: "Visa, Mastercard", icon: "💳" },
-  { id: "cod", label: "Cash on delivery (COD)", deskripsi: "Pay in cash when the item arrives", icon: "🚚" },
+  { id: "kartu", label: "Kartu Debit / Kredit", deskripsi: "Visa, Mastercard", icon: "💳" },
+  { id: "cod", label: "Bayar di Tempat (COD)", deskripsi: "Bayar tunai saat barang tiba", icon: "🚚" },
 ];
 
 const opsiBank = ["BCA", "Mandiri", "BNI", "BRI"];
@@ -25,11 +28,11 @@ const opsiEwallet = ["GoPay", "OVO", "DANA", "ShopeePay"];
 const opsiKartu = ["Visa", "Mastercard"];
 
 const alasanBatal = [
-  "Selected the wrong payment method",
-  "Want to change the shipping address",
-  "Changed my mind",
-  "Found a cheaper price elsewhere",
-  "Other",
+  "Salah memilih metode pembayaran",
+  "Ingin mengubah alamat pengiriman",
+  "Berubah pikiran",
+  "Menemukan harga lebih murah di tempat lain",
+  "Lainnya",
 ];
 
 const dummyItems = [
@@ -37,12 +40,12 @@ const dummyItems = [
   { id: 2, nama: "Celana Chino Slim Fit", varian: "Krem, 32", qty: 1, harga: 215000 },
 ];
 
-function formatRupiah(angka) {
-  return angka.toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 });
-}
-
-export default function PilihPembayaran({ items = dummyItems }) {
+export default function PilihPembayaran() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { items: cartItems, clear } = useCart();
+  const customer = location.state?.customer;
+  const items = cartItems.length > 0 ? cartItems : dummyItems;
   const [dipilih, setDipilih] = useState("transfer");
   const [opsiTerpilih, setOpsiTerpilih] = useState("");
   const [tampil, setTampil] = useState(false);
@@ -51,7 +54,7 @@ export default function PilihPembayaran({ items = dummyItems }) {
   const [nomorHp, setNomorHp] = useState("");
   const [kartu, setKartu] = useState({ nomor: "", nama: "", kadaluarsa: "", cvv: "" });
 
-  // Konfirmasi pembayaran (muncul setelah klik "Pay now")
+  // Konfirmasi pembayaran (muncul setelah klik "Bayar sekarang")
   const [showKonfirmasi, setShowKonfirmasi] = useState(false);
   const [showBatal, setShowBatal] = useState(false);
   const [alasanTerpilih, setAlasanTerpilih] = useState("");
@@ -69,33 +72,71 @@ export default function PilihPembayaran({ items = dummyItems }) {
 
   const updateKartu = (field) => (e) => setKartu((k) => ({ ...k, [field]: e.target.value }));
 
-  const handleProceed = () => {
+  const metodeLabel = (() => {
+    const m = metodeBayar.find((x) => x.id === dipilih)?.label || "Pembayaran";
+    return opsiTerpilih ? `${m} · ${opsiTerpilih}` : m;
+  })();
+
+  function buatPelanggan(c) {
+    if (!c) return { nama: "Pelanggan", alamat: "-", telepon: "-" };
+    return {
+      nama: [c.firstName, c.lastName].filter(Boolean).join(" ") || "Pelanggan",
+      alamat: [c.address, c.city, c.province, c.postalCode, c.negara].filter(Boolean).join(", ") || "-",
+      telepon: c.phone || c.email || "-",
+    };
+  }
+
+  function simpanPesanan(status, alasan) {
+    const now = new Date();
     const orderId = buatOrderId();
+    simpanOrder({
+      orderId,
+      invoiceId: orderId,
+      status, // "paid" | "failed"
+      items,
+      subtotal,
+      ongkir,
+      total,
+      metode: metodeLabel,
+      metodeBayar: metodeLabel,
+      waktu: now.toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+      tanggalTerbit: now.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }),
+      pelanggan: buatPelanggan(customer),
+      pengiriman: "Reguler · 3-4 hari",
+      alasan,
+    });
+    return orderId;
+  }
+
+  const handleProceed = () => {
+    const orderId = simpanPesanan("paid");
+    clear(); // pembayaran sukses -> kosongkan keranjang
     navigate(`/pembayaran/status/${orderId}`);
   };
 
   const handleKonfirmasiBatal = () => {
-    const orderId = buatOrderId();
+    const orderId = simpanPesanan("failed", alasanTerpilih);
+    // keranjang dibiarkan agar bisa dicoba lagi
     navigate(`/invoice/${orderId}`, { state: { status: "failed", alasan: alasanTerpilih } });
   };
 
   return (
     <div
-      className={`min-h-screen bg-[#F4F1EA] transition-opacity duration-500 ${
+      className={`min-h-screen bg-cloud transition-opacity duration-500 ${
         tampil ? "opacity-100" : "opacity-0"
       }`}
     >
-      <header className="border-b border-stone-300/60 bg-white py-4 text-center">
-        <h1 className="text-xl font-bold tracking-[0.2em] text-stone-900">{NAMA_TOKO}</h1>
+      <header className="border-b border-ash/60 bg-white py-4 text-center">
+        <h1 className="text-xl font-bold tracking-[0.2em] text-ink">{NAMA_TOKO}</h1>
       </header>
 
       <div className="mx-auto grid max-w-6xl grid-cols-1 md:grid-cols-2 md:gap-12">
         <div className="px-6 py-8 md:px-0 md:py-10">
           <div className="mx-auto max-w-md md:ml-auto md:mr-0">
-            <nav className="mb-6 flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-stone-400 md:justify-start">
+            <nav className="mb-6 flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-steel md:justify-start">
               {langkahCheckout.map((langkah, i) => (
                 <span key={langkah} className="flex items-center gap-1.5">
-                  <span className={i === 3 ? "font-medium text-stone-900" : ""}>{langkah}</span>
+                  <span className={i === 3 ? "font-medium text-ink" : ""}>{langkah}</span>
                   {i < langkahCheckout.length - 1 && <span>›</span>}
                 </span>
               ))}
@@ -103,15 +144,15 @@ export default function PilihPembayaran({ items = dummyItems }) {
 
             {!showKonfirmasi ? (
               <>
-                <h2 className="mb-1 text-lg font-semibold text-stone-900">Choose payment method</h2>
-                <p className="mb-6 text-sm text-stone-500">Choose the payment method that's most convenient for you.</p>
+                <h2 className="mb-1 text-lg font-semibold text-ink">Pilih metode pembayaran</h2>
+                <p className="mb-6 text-sm text-smoke">Pilih metode pembayaran yang paling nyaman untukmu.</p>
 
                 <div className="space-y-2">
                   {metodeBayar.map((m) => (
                     <div key={m.id}>
                       <label
-                        className={`flex cursor-pointer items-center justify-between rounded-md border bg-white p-3.5 transition ${
-                          dipilih === m.id ? "border-stone-900 ring-1 ring-stone-900" : "border-stone-300"
+                        className={`flex cursor-pointer items-center justify-between border bg-white p-3.5 transition ${
+                          dipilih === m.id ? "border-ink ring-1 ring-ink" : "border-ash"
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -123,12 +164,12 @@ export default function PilihPembayaran({ items = dummyItems }) {
                               setDipilih(m.id);
                               setOpsiTerpilih("");
                             }}
-                            className="h-4 w-4 accent-stone-900"
+                            className="h-4 w-4 accent-ink"
                           />
                           <span className="text-lg">{m.icon}</span>
                           <div>
-                            <p className="text-sm font-medium text-stone-800">{m.label}</p>
-                            <p className="text-xs text-stone-500">{m.deskripsi}</p>
+                            <p className="text-sm font-medium text-ink-soft">{m.label}</p>
+                            <p className="text-xs text-smoke">{m.deskripsi}</p>
                           </div>
                         </div>
                       </label>
@@ -141,10 +182,10 @@ export default function PilihPembayaran({ items = dummyItems }) {
                               key={opsi}
                               type="button"
                               onClick={() => setOpsiTerpilih(opsi)}
-                              className={`rounded-md border px-3 py-2 text-sm font-medium transition ${
+                              className={` border px-3 py-2 text-sm font-medium transition ${
                                 opsiTerpilih === opsi
-                                  ? "border-stone-900 bg-stone-900 text-white"
-                                  : "border-stone-300 bg-white text-stone-700 hover:border-stone-400"
+                                  ? "border-ink bg-ink text-white"
+                                  : "border-ash bg-white text-ink-soft hover:border-steel"
                               }`}
                             >
                               {opsi}
@@ -155,42 +196,42 @@ export default function PilihPembayaran({ items = dummyItems }) {
 
                       {/* Input nomor rekening — HANYA muncul untuk transfer bank yang sedang dipilih */}
                       {dipilih === m.id && m.id === "transfer" && opsiTerpilih && (
-                        <div className="mt-2 animate-slidefade rounded-md border border-stone-300 bg-white p-3.5 pl-2">
-                          <label className="mb-1 block text-xs font-medium text-stone-600">
-                            Your {opsiTerpilih} account number
+                        <div className="mt-2 animate-slidefade border border-ash bg-white p-3.5 pl-2">
+                          <label className="mb-1 block text-xs font-medium text-smoke">
+                            Nomor rekening {opsiTerpilih} kamu
                           </label>
                           <input
                             type="text"
                             inputMode="numeric"
                             value={nomorRekening}
                             onChange={(e) => setNomorRekening(e.target.value)}
-                            placeholder="e.g. 1234567890"
-                            className="w-full rounded-md border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                            placeholder="mis. 1234567890"
+                            className="w-full border border-ash bg-white px-3 py-2.5 text-sm outline-none focus:border-ink focus:ring-1 focus:ring-ink"
                           />
                         </div>
                       )}
 
                       {/* Input nomor HP — HANYA muncul untuk e-wallet yang sedang dipilih */}
                       {dipilih === m.id && m.id === "ewallet" && opsiTerpilih && (
-                        <div className="mt-2 animate-slidefade rounded-md border border-stone-300 bg-white p-3.5 pl-2">
-                          <label className="mb-1 block text-xs font-medium text-stone-600">
-                            Phone number registered with {opsiTerpilih}
+                        <div className="mt-2 animate-slidefade border border-ash bg-white p-3.5 pl-2">
+                          <label className="mb-1 block text-xs font-medium text-smoke">
+                            Nomor HP terdaftar di {opsiTerpilih}
                           </label>
                           <input
                             type="tel"
                             value={nomorHp}
                             onChange={(e) => setNomorHp(e.target.value)}
-                            placeholder="e.g. 08xx-xxxx-xxxx"
-                            className="w-full rounded-md border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                            placeholder="mis. 08xx-xxxx-xxxx"
+                            className="w-full border border-ash bg-white px-3 py-2.5 text-sm outline-none focus:border-ink focus:ring-1 focus:ring-ink"
                           />
                         </div>
                       )}
 
                       {/* Input data kartu — HANYA muncul untuk kartu yang sedang dipilih */}
                       {dipilih === m.id && m.id === "kartu" && opsiTerpilih && (
-                        <div className="mt-2 animate-slidefade space-y-2 rounded-md border border-stone-300 bg-white p-3.5 pl-2">
+                        <div className="mt-2 animate-slidefade space-y-2 border border-ash bg-white p-3.5 pl-2">
                           <div>
-                            <label className="mb-1 block text-xs font-medium text-stone-600">Card number</label>
+                            <label className="mb-1 block text-xs font-medium text-smoke">Nomor kartu</label>
                             <input
                               type="text"
                               inputMode="numeric"
@@ -198,40 +239,40 @@ export default function PilihPembayaran({ items = dummyItems }) {
                               value={kartu.nomor}
                               onChange={updateKartu("nomor")}
                               placeholder="0000 0000 0000 0000"
-                              className="w-full rounded-md border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                              className="w-full border border-ash bg-white px-3 py-2.5 text-sm outline-none focus:border-ink focus:ring-1 focus:ring-ink"
                             />
                           </div>
                           <div>
-                            <label className="mb-1 block text-xs font-medium text-stone-600">Cardholder name</label>
+                            <label className="mb-1 block text-xs font-medium text-smoke">Nama pemegang kartu</label>
                             <input
                               type="text"
                               value={kartu.nama}
                               onChange={updateKartu("nama")}
-                              placeholder="As shown on the card"
-                              className="w-full rounded-md border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                              placeholder="Sesuai yang tertera di kartu"
+                              className="w-full border border-ash bg-white px-3 py-2.5 text-sm outline-none focus:border-ink focus:ring-1 focus:ring-ink"
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="mb-1 block text-xs font-medium text-stone-600">Expiry</label>
+                              <label className="mb-1 block text-xs font-medium text-smoke">Kedaluwarsa</label>
                               <input
                                 type="text"
                                 value={kartu.kadaluarsa}
                                 onChange={updateKartu("kadaluarsa")}
-                                placeholder="MM/YY"
+                                placeholder="BB/TT"
                                 maxLength={5}
-                                className="w-full rounded-md border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                                className="w-full border border-ash bg-white px-3 py-2.5 text-sm outline-none focus:border-ink focus:ring-1 focus:ring-ink"
                               />
                             </div>
                             <div>
-                              <label className="mb-1 block text-xs font-medium text-stone-600">CVV</label>
+                              <label className="mb-1 block text-xs font-medium text-smoke">CVV</label>
                               <input
                                 type="password"
                                 value={kartu.cvv}
                                 onChange={updateKartu("cvv")}
                                 placeholder="•••"
                                 maxLength={4}
-                                className="w-full rounded-md border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-stone-900 focus:ring-1 focus:ring-stone-900"
+                                className="w-full border border-ash bg-white px-3 py-2.5 text-sm outline-none focus:border-ink focus:ring-1 focus:ring-ink"
                               />
                             </div>
                           </div>
@@ -239,8 +280,8 @@ export default function PilihPembayaran({ items = dummyItems }) {
                       )}
 
                       {dipilih === m.id && m.id === "cod" && (
-                        <div className="mt-2 animate-slidefade rounded-md border border-amber-300 bg-amber-50 px-3.5 py-2.5 text-xs text-amber-800">
-                          Please have exact change ready, couriers don't always carry change.
+                        <div className="mt-2 animate-slidefade border border-amber-300 bg-amber-50 px-3.5 py-2.5 text-xs text-amber-800">
+                          Siapkan uang pas ya, kurir tidak selalu punya kembalian.
                         </div>
                       )}
                     </div>
@@ -251,49 +292,49 @@ export default function PilihPembayaran({ items = dummyItems }) {
                   <button
                     type="button"
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-1 text-sm font-medium text-stone-700 transition hover:text-stone-900"
+                    className="flex items-center gap-1 text-sm font-medium text-ink-soft transition hover:text-ink"
                   >
-                    <span aria-hidden="true">‹</span> Back
+                    <span aria-hidden="true">‹</span> Kembali
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowKonfirmasi(true)}
-                    className="rounded-md bg-stone-900 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-800 active:scale-[0.98]"
+                    className=" bg-ink px-6 py-2.5 border border-ink text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-ink active:scale-[0.98]"
                   >
-                    Pay now
+                    Bayar sekarang
                   </button>
                 </div>
               </>
             ) : (
               /* Kartu konfirmasi pembayaran */
               <Card className="animate-slidefade p-5">
-                <h2 className="mb-4 text-base font-semibold text-stone-900">Confirm your payment</h2>
+                <h2 className="mb-4 text-base font-semibold text-ink">Konfirmasi pembayaranmu</h2>
 
                 <ul className="mb-4 space-y-3">
                   {items.map((item) => (
                     <li key={item.id} className="flex justify-between text-sm">
                       <div>
-                        <p className="font-medium text-stone-800">{item.nama}</p>
-                        <p className="text-xs text-stone-500">{item.varian} · x{item.qty}</p>
+                        <p className="font-medium text-ink-soft">{item.nama}</p>
+                        <p className="text-xs text-smoke">{item.varian} · x{item.qty}</p>
                       </div>
-                      <span className="whitespace-nowrap text-stone-700">{formatRupiah(item.harga * item.qty)}</span>
+                      <span className="whitespace-nowrap text-ink-soft">{formatRupiah(item.harga * item.qty)}</span>
                     </li>
                   ))}
                 </ul>
 
-                <div className="space-y-2 border-t border-dashed border-stone-300 pt-3 text-sm">
-                  <div className="flex justify-between text-stone-600">
+                <div className="space-y-2 border-t border-dashed border-ash pt-3 text-sm">
+                  <div className="flex justify-between text-smoke">
                     <span>Subtotal</span>
                     <span>{formatRupiah(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-stone-600">
-                    <span>Shipping</span>
+                  <div className="flex justify-between text-smoke">
+                    <span>Pengiriman</span>
                     <span>{formatRupiah(ongkir)}</span>
                   </div>
                 </div>
-                <div className="mt-3 flex justify-between border-t border-dashed border-stone-300 pt-3">
-                  <span className="font-semibold text-stone-800">Total</span>
-                  <span className="font-semibold text-stone-900">{formatRupiah(total)}</span>
+                <div className="mt-3 flex justify-between border-t border-dashed border-ash pt-3">
+                  <span className="font-semibold text-ink-soft">Total</span>
+                  <span className="font-semibold text-ink">{formatRupiah(total)}</span>
                 </div>
 
                 {!showBatal ? (
@@ -301,29 +342,29 @@ export default function PilihPembayaran({ items = dummyItems }) {
                     <button
                       type="button"
                       onClick={() => setShowBatal(true)}
-                      className="flex-1 rounded-md border border-stone-300 bg-white py-2.5 text-sm font-semibold text-stone-600 transition hover:bg-stone-50"
+                      className="flex-1 border border-ink bg-white py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:bg-ink hover:text-white"
                     >
-                      Cancel payment
+                      Batalkan pembayaran
                     </button>
                     <button
                       type="button"
                       onClick={handleProceed}
-                      className="flex-1 rounded-md bg-stone-900 py-2.5 text-sm font-semibold text-white transition hover:bg-stone-800 active:scale-[0.98]"
+                      className="flex-1 bg-ink py-2.5 border border-ink text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-ink active:scale-[0.98]"
                     >
-                      Proceed
+                      Lanjutkan
                     </button>
                   </div>
                 ) : (
-                  <div className="mt-5 animate-slidefade space-y-2 rounded-md border border-stone-200 bg-stone-50 p-4">
-                    <p className="mb-2 text-sm font-medium text-stone-800">Why are you cancelling this payment?</p>
+                  <div className="mt-5 animate-slidefade space-y-2 border border-ash bg-cloud p-4">
+                    <p className="mb-2 text-sm font-medium text-ink-soft">Kenapa kamu membatalkan pembayaran ini?</p>
                     {alasanBatal.map((alasan) => (
-                      <label key={alasan} className="flex cursor-pointer items-center gap-2 text-sm text-stone-600">
+                      <label key={alasan} className="flex cursor-pointer items-center gap-2 text-sm text-smoke">
                         <input
                           type="radio"
                           name="alasanBatal"
                           checked={alasanTerpilih === alasan}
                           onChange={() => setAlasanTerpilih(alasan)}
-                          className="h-3.5 w-3.5 accent-stone-900"
+                          className="h-3.5 w-3.5 accent-ink"
                         />
                         {alasan}
                       </label>
@@ -332,17 +373,17 @@ export default function PilihPembayaran({ items = dummyItems }) {
                       <button
                         type="button"
                         onClick={() => setShowBatal(false)}
-                        className="flex-1 rounded-md border border-stone-300 bg-white py-2 text-sm font-medium text-stone-600 transition hover:bg-stone-100"
+                        className="flex-1 border border-ink bg-white py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:bg-ink hover:text-white"
                       >
-                        Back
+                        Kembali
                       </button>
                       <button
                         type="button"
                         onClick={handleKonfirmasiBatal}
                         disabled={!alasanTerpilih}
-                        className="flex-1 rounded-md bg-red-600 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+                        className="flex-1 border border-red-600 bg-red-600 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-red-600 disabled:opacity-50"
                       >
-                        Confirm cancellation
+                        Konfirmasi pembatalan
                       </button>
                     </div>
                   </div>
@@ -352,36 +393,36 @@ export default function PilihPembayaran({ items = dummyItems }) {
           </div>
         </div>
 
-        <div className="border-t border-stone-300/60 px-6 py-8 md:border-t-0 md:border-l md:px-0 md:py-10">
+        <div className="border-t border-ash/60 px-6 py-8 md:border-t-0 md:border-l md:px-0 md:py-10">
           <div className="mx-auto max-w-md md:mr-auto md:ml-0">
             <ul className="space-y-4">
               {items.map((item) => (
                 <li key={item.id} className="flex items-center justify-between text-sm">
                   <div>
-                    <p className="font-medium text-stone-800">{item.nama}</p>
-                    <p className="text-xs text-stone-500">{item.varian} · x{item.qty}</p>
+                    <p className="font-medium text-ink-soft">{item.nama}</p>
+                    <p className="text-xs text-smoke">{item.varian} · x{item.qty}</p>
                   </div>
-                  <span className="text-stone-700">{formatRupiah(item.harga * item.qty)}</span>
+                  <span className="text-ink-soft">{formatRupiah(item.harga * item.qty)}</span>
                 </li>
               ))}
             </ul>
 
-            <div className="mt-6 space-y-2 border-t border-stone-300/60 pt-4 text-sm">
-              <div className="flex justify-between text-stone-600">
+            <div className="mt-6 space-y-2 border-t border-ash/60 pt-4 text-sm">
+              <div className="flex justify-between text-smoke">
                 <span>Subtotal</span>
                 <span>{formatRupiah(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-stone-600">
-                <span>Shipping</span>
+              <div className="flex justify-between text-smoke">
+                <span>Pengiriman</span>
                 <span>{formatRupiah(ongkir)}</span>
               </div>
             </div>
 
-            <div className="mt-3 flex items-center justify-between border-t border-stone-300/60 pt-3">
-              <span className="text-base font-semibold text-stone-900">Total</span>
+            <div className="mt-3 flex items-center justify-between border-t border-ash/60 pt-3">
+              <span className="text-base font-semibold text-ink">Total</span>
               <span className="text-right">
-                <span className="mr-1 align-top text-[11px] text-stone-400">IDR</span>
-                <span className="text-lg font-semibold text-stone-900">{formatRupiah(total)}</span>
+                <span className="mr-1 align-top text-[11px] text-steel">IDR</span>
+                <span className="text-lg font-semibold text-ink">{formatRupiah(total)}</span>
               </span>
             </div>
           </div>

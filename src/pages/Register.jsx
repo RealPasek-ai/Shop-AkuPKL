@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import AuthLayout from '../layouts/AuthLayout'
-import Input from '../components/Input'
+import Input from '../components/Login/Input'
 import Button from '../components/Button'
-import Alert from '../components/Alert'
-import PasswordStrength from '../components/PasswordStrength'
-import { useAuth } from '../hooks/useAuth'
+import Alert from '../components/Login/Alert'
+import PasswordStrength from '../components/Login/PasswordStrength'
+import { useAuth } from '../hooks/Login/useAuth'
 import { useGlobalToast } from '../context/ToastContext'
 import {
   validateName,
@@ -22,8 +22,10 @@ export default function Register() {
   const { register } = useAuth()
   const { showToast } = useGlobalToast()
   const navigate = useNavigate()
+  const location = useLocation()
 
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' })
+  // Email bisa terisi otomatis dari kotak newsletter di beranda.
+  const [form, setForm] = useState({ name: '', email: location.state?.email || '', password: '', confirmPassword: '' })
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -131,9 +133,9 @@ export default function Register() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-stone-500">
+      <p className="mt-6 text-center text-sm text-smoke">
         Sudah punya akun?{' '}
-        <Link to="/login" className="font-medium text-gold hover:underline">
+        <Link to="/login" className="font-medium text-ink hover:underline">
           Masuk di sini
         </Link>
       </p>

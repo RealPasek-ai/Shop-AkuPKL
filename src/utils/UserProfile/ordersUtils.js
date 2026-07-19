@@ -1,18 +1,14 @@
 export const getStatusTheme = (status) => {
   const currentStatus = status.toLowerCase();
-  
-  if (currentStatus === 'pending') return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-  if (currentStatus === 'diproses') return 'bg-blue-100 text-blue-800 border-blue-200';
-  if (currentStatus === 'selesai') return 'bg-green-100 text-green-800 border-green-200';
-  if (currentStatus === 'dibatalkan') return 'bg-red-100 text-red-800 border-red-200';
-  
-  return 'bg-gray-100 text-gray-800 border-gray-200';
+
+  // Selaras dengan palet situs: netral mono + warna status (amber/emerald/red).
+  if (currentStatus === 'pending') return 'bg-amber-50 text-amber-700 border-amber-300';
+  if (currentStatus === 'diproses') return 'bg-cloud text-ink-soft border-ash';
+  if (currentStatus === 'selesai') return 'bg-emerald-50 text-emerald-700 border-emerald-300';
+  if (currentStatus === 'dibatalkan') return 'bg-red-50 text-red-700 border-red-300';
+
+  return 'bg-cloud text-smoke border-ash';
 };
 
-export const formatRupiah = (angka) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0
-  }).format(angka);
-};
+// Sumber tunggal format Rupiah ada di utils/format.js — re-export agar konsisten.
+export { formatRupiah } from '../format';

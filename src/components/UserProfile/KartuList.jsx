@@ -13,7 +13,7 @@ const KartuList = ({ kartu, jenis, setKartu }) => {
 
   if (filteredKartu.length === 0) {
     return (
-      <div className="text-center text-gray-400/80 text-sm py-10 bg-[#FBF8F3]/40 rounded-2xl border border-dashed border-gray-300/60 font-medium">
+      <div className="text-center text-steel/80 text-sm py-10 bg-cloud/40 border border-dashed border-ash/60 font-medium">
         Belum ada {jenis.toLowerCase()} yang ditambahkan.
       </div>
     );
@@ -26,7 +26,7 @@ const KartuList = ({ kartu, jenis, setKartu }) => {
           
         
           <div 
-            className={`w-full aspect-[1.58] bg-linear-to-br ${getCardTheme(item.namaBank || item.jenis)} rounded-2xl p-6 shadow-sm hover:shadow-md relative overflow-hidden flex flex-col justify-between transition-all duration-300`}
+            className={`w-full aspect-[1.58] bg-linear-to-br ${getCardTheme(item.namaBank || item.jenis)} p-6 relative overflow-hidden flex flex-col justify-between transition-all duration-300`}
           >
             
             <div className="absolute top-0 right-0 -mr-6 -mt-6 w-24 h-24 rounded-full bg-white opacity-10 pointer-events-none"></div>
@@ -34,10 +34,10 @@ const KartuList = ({ kartu, jenis, setKartu }) => {
             
             
             <div className="flex justify-between items-start z-10">
-              <span className="font-extrabold text-lg italic tracking-wider drop-shadow-sm">
+              <span className="font-extrabold text-lg italic tracking-wider drop-">
                 {item.namaBank || (item.jenis === "OCTO Cash by CIMB Niaga" ? "CIMB NIAGA" : "CREDIT CARD")}
               </span>
-              <span className="text-[9px] bg-white/20 px-2 py-0.5 rounded font-bold uppercase tracking-wider backdrop-blur-sm">
+              <span className="text-[9px] bg-white/20 px-2 py-0.5 font-bold uppercase tracking-wider backdrop-blur-sm">
                 {item.namaBank ? "DEBIT" : "DIGITAL"}
               </span>
             </div>
@@ -45,12 +45,12 @@ const KartuList = ({ kartu, jenis, setKartu }) => {
             
             <div className="z-10">
              
-              <div className="w-10 h-7 bg-amber-400 rounded-md mb-2 border border-amber-600/30 opacity-95 relative overflow-hidden shadow-inner">
+              <div className="w-10 h-7 bg-amber-400 mb-2 border border-amber-600/30 opacity-95 relative overflow-hidden">
                 <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 border border-amber-500/20 opacity-40"></div>
               </div>
               
               
-              <div className="font-mono text-xl tracking-[0.12em] drop-shadow-sm">
+              <div className="font-mono text-xl tracking-[0.12em] drop-">
                 {maskNumber(item.nomor)}
               </div>
             </div>
@@ -79,7 +79,7 @@ const KartuList = ({ kartu, jenis, setKartu }) => {
           <div className="flex justify-end mt-2 px-1">
             <button 
               onClick={() => handleHapus(item.id)}
-              className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1 opacity-80 hover:opacity-100 cursor-pointer"
+              className="text-xs font-bold text-steel hover:text-red-500 transition-colors flex items-center gap-1 opacity-80 hover:opacity-100 cursor-pointer"
             >
               ✕ HAPUS KARTU
             </button>

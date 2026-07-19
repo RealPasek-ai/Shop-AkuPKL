@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../layouts/AuthLayout'
-import Input from '../components/Input'
+import Input from '../components/Login/Input'
 import Button from '../components/Button'
-import Alert from '../components/Alert'
+import Alert from '../components/Login/Alert'
 import { useGlobalToast } from '../context/ToastContext'
 import { authService } from '../services/authService'
 import { validateEmail } from '../utils/validation'
@@ -69,9 +69,9 @@ export default function ForgotPassword() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-stone-500">
+      <p className="mt-6 text-center text-sm text-smoke">
         Ingat password Anda?{' '}
-        <Link to="/login" className="font-medium text-gold hover:underline">
+        <Link to="/login" className="font-medium text-ink hover:underline">
           Kembali ke Masuk
         </Link>
       </p>
