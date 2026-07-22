@@ -56,7 +56,7 @@ const Orders = ({ user }) => {
                 className="flex items-center gap-4 p-4 border-b border-ash/40 last:border-0"
               >
                 <div className="w-16 h-16 bg-cloud overflow-hidden shrink-0 border border-ash/30">
-                  <img src={order.image} alt={order.item} className="w-full h-full object-cover" />
+                  <img src={order.image || undefined} alt={order.item} className="w-full h-full object-cover" />
                 </div>
 
                 <div className="grow">

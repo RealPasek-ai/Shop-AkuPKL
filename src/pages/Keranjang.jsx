@@ -30,20 +30,19 @@ export default function Keranjang() {
     <section className="mx-auto max-w-5xl px-4 py-12 sm:px-8">
       <SectionTitle eyebrow="Keranjang" title="Keranjang Belanja" description={`${totalItem} item dalam keranjang.`} />
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[1.6fr_1fr]">
+      <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         {/* Daftar item */}
-        <ul className="divide-y divide-ash border-y border-ash">
+        <ul className="min-w-0 divide-y divide-ash border-y border-ash">
           {items.map((item) => (
-            <li key={item.id} className="flex items-center gap-4 py-3">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center border border-ash bg-white p-1.5">
-                <img src={item.gambar} alt={item.nama} className="h-full w-full object-contain" />
+            <li key={item.id} className="flex items-center gap-4 py-4">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center border border-ash bg-white p-2">
+                <img src={item.gambar || undefined} alt={item.nama} className="h-full w-full object-contain" />
               </div>
 
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-ink">{item.nama}</p>
-                <p className="mt-0.5 truncate text-xs text-smoke">
-                  {item.varian ? `${item.varian} · ` : ''}{formatRupiah(item.harga)}
-                </p>
+                {item.varian && <p className="eyebrow mt-1 text-smoke">{item.varian}</p>}
+                <p className="mt-1 text-sm text-smoke">{formatRupiah(item.harga)}</p>
               </div>
 
               <div className="flex items-center border border-black">
@@ -81,19 +80,19 @@ export default function Keranjang() {
         </ul>
 
         {/* Ringkasan */}
-        <div className="h-fit border border-black p-6">
+        <div className="h-fit min-w-0 border border-black p-6">
           <p className="eyebrow text-smoke">Ringkasan</p>
-          <div className="mt-4 flex justify-between text-sm text-smoke">
-            <span>Subtotal · {totalItem} item</span>
-            <span>{formatRupiah(totalHarga)}</span>
+          <div className="mt-4 flex items-baseline justify-between gap-3 text-sm text-smoke">
+            <span>Subtotal</span>
+            <span className="whitespace-nowrap text-ink">{formatRupiah(totalHarga)}</span>
           </div>
-          <div className="mt-2 flex justify-between text-sm text-smoke">
+          <div className="mt-2 flex items-baseline justify-between gap-3 text-sm text-smoke">
             <span>Ongkir</span>
-            <span className="text-steel">Dihitung saat checkout</span>
+            <span className="whitespace-nowrap text-steel">Saat checkout</span>
           </div>
-          <div className="mt-4 flex items-center justify-between border-t border-ash pt-4">
+          <div className="mt-4 flex items-baseline justify-between gap-3 border-t border-ash pt-4">
             <span className="text-base font-semibold text-ink">Total</span>
-            <span className="heading-display text-xl text-ink">{formatRupiah(totalHarga)}</span>
+            <span className="heading-display whitespace-nowrap text-xl text-ink">{formatRupiah(totalHarga)}</span>
           </div>
 
           <button

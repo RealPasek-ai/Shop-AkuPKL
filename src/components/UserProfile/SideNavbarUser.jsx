@@ -16,7 +16,7 @@ const SideNavbarUser = ({ user }) => {
             <span className="text-sm">👤</span>
           )}
         </div>
-        <div className="font-bold text-xs tracking-wider uppercase text-ink">{user.username}</div>
+        <div className="font-bold text-xs tracking-wider uppercase text-ink">{user.username || user.name}</div>
         
       </div>
 

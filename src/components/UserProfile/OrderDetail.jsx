@@ -1,13 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useOrders } from '../../hooks/UserProfile/useOrders';
-import { formatRupiah } from '../../utils/UserProfile/ordersUtils';
+import { formatRupiah, getStatusTheme } from '../../utils/UserProfile/ordersUtils';
 import SideNavbarUser from "./SideNavbarUser";
 
 const OrderDetail = ({ user }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { orders } = useOrders();
-  
+  const { orders, updateStatus } = useOrders();
+
   const order = orders.find((o) => o.id === id);
 
   if (!order) return <div className="p-10">Pesanan tidak ditemukan.</div>;
@@ -28,7 +28,12 @@ const OrderDetail = ({ user }) => {
 
         <div className="bg-white border border-ash/40 p-6 space-y-6">
           <div className="border-b border-ash/40 pb-6">
-            <h1 className="text-sm font-black tracking-wider uppercase text-ink">{order.item}</h1>
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-sm font-black tracking-wider uppercase text-ink">{order.item}</h1>
+              <span className={`shrink-0 px-2 py-0.5 text-[10px] font-bold border ${getStatusTheme(order.status)}`}>
+                {order.status}
+              </span>
+            </div>
             <p className="text-[10px] font-bold text-steel uppercase tracking-wider mt-1">ID: {order.id} • {order.tanggal}</p>
           </div>
 
@@ -55,6 +60,34 @@ const OrderDetail = ({ user }) => {
                 </div>
               </div>
             </section>
+          </div>
+
+          {/* Aksi status pesanan: Pending -> (Selesai Pembayaran) -> Diproses ->
+              (Pesanan Sampai Tujuan) -> Selesai */}
+          <div className="border-t border-ash/40 pt-6">
+            {order.status === 'Pending' && (
+              <button
+                type="button"
+                onClick={() => updateStatus(order.id, 'Diproses')}
+                className="w-full bg-ink py-2.5 border border-ink text-xs font-bold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-ink cursor-pointer"
+              >
+                Selesai Pembayaran
+              </button>
+            )}
+            {order.status === 'Diproses' && (
+              <button
+                type="button"
+                onClick={() => updateStatus(order.id, 'Selesai')}
+                className="w-full bg-ink py-2.5 border border-ink text-xs font-bold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-ink cursor-pointer"
+              >
+                Pesanan Sampai Tujuan
+              </button>
+            )}
+            {order.status === 'Selesai' && (
+              <p className="text-center text-xs font-bold uppercase tracking-wider text-emerald-600">
+                ✓ Pesanan selesai
+              </p>
+            )}
           </div>
         </div>
       </main>

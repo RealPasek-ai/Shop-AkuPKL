@@ -6,11 +6,6 @@ import { formatRupiah } from "../../utils/format";
 
 const NAMA_TOKO = "WM.";
 
-const dummyItems = [
-  { id: 1, nama: "Kaos Polos Katun Combed", varian: "Hitam, L", qty: 2, harga: 89000 },
-  { id: 2, nama: "Celana Chino Slim Fit", varian: "Krem, 32", qty: 1, harga: 215000 },
-];
-
 export default function Invoice() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,13 +21,13 @@ export default function Invoice() {
     refetch,
   } = useFetch(() => fetchInvoice(invoiceId), [invoiceId]);
 
-  // Sumber dari order nyata (fetch); fallback ke contoh untuk orderId lama.
-  const items = invoice?.items || dummyItems;
+  // Sumber dari order nyata (fetch).
+  const items = invoice?.items || [];
   const subtotal = invoice?.subtotal ?? items.reduce((acc, item) => acc + item.harga * item.qty, 0);
   const ongkir = invoice?.ongkir ?? 15000;
   const total = invoice?.total ?? subtotal + ongkir;
 
-  const status = invoice?.status || statusDariCancel || "paid";
+  const status = invoice?.status || statusDariCancel || "diproses";
 
   return (
     <div className="min-h-screen bg-cloud">
@@ -77,11 +72,17 @@ export default function Invoice() {
                   className={`inline-flex items-center gap-1.5 self-start rounded-full border px-3 py-1 text-xs font-medium ${
                     status === "failed"
                       ? "border-red-300 bg-red-50 text-red-700"
+                      : status === "pending"
+                      ? "border-amber-300 bg-amber-50 text-amber-700"
                       : "border-emerald-300 bg-emerald-50 text-emerald-700"
                   }`}
                 >
-                  <span className={`h-1.5 w-1.5 rounded-full ${status === "failed" ? "bg-red-500" : "bg-emerald-500"}`} />
-                  {status === "failed" ? "Gagal" : "Lunas"}
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      status === "failed" ? "bg-red-500" : status === "pending" ? "bg-amber-500" : "bg-emerald-500"
+                    }`}
+                  />
+                  {status === "failed" ? "Gagal" : status === "pending" ? "Menunggu Pembayaran" : "Diproses"}
                 </span>
               </div>
 

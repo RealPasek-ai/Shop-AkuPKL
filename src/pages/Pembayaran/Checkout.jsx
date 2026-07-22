@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { formatRupiah } from "../../utils/format";
 import { useCart } from "../../context/CartContext";
+import Swal from "sweetalert2";
+import useAlamat from "../../hooks/UserProfile/useAlamat";
+import useUser from "../../hooks/UserProfile/useUser";
+import { useAuth } from "../../hooks/Login/useAuth";
 const NAMA_TOKO = "WM.";
-
-const dummyItems = [
-  { id: 1, nama: "Kaos Polos Katun Combed", varian: "Hitam, L", qty: 2, harga: 89000, gambar: "https://placehold.co/64x64/f4f1ea/78716c?text=Kaos" },
-  { id: 2, nama: "Celana Chino Slim Fit", varian: "Krem, 32", qty: 1, harga: 215000, gambar: "https://placehold.co/64x64/f4f1ea/78716c?text=Celana" },
-];
 
 const langkahCheckout = ["Keranjang", "Informasi", "Pengiriman", "Pembayaran"];
 
@@ -65,9 +64,10 @@ const expressCheckout = [
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { items: cartItems } = useCart();
-  // Pakai isi keranjang nyata; jika kosong (mis. dibuka langsung), pakai contoh.
-  const items = cartItems.length > 0 ? cartItems : dummyItems;
+  const { items } = useCart();
+  const { alamat } = useAlamat();
+  const { currentUser } = useAuth();
+  const { user, setUser } = useUser();
 
   const [kodePromo, setKodePromo] = useState("");
 
@@ -76,12 +76,12 @@ export default function Checkout() {
   const [form, setForm] = useState({
     email: "",
     negara: "Indonesia",
-    firstName: "",
-    lastName: "",
+    username: "",
+    fullName: "",
     address: "",
+    detail: "",
     city: "",
     province: "",
-    postalCode: "",
     phone: "",
   });
   const [sudahCobaSubmit, setSudahCobaSubmit] = useState(false);
@@ -90,24 +90,72 @@ export default function Checkout() {
     setTampil(true);
   }, []);
 
+  // Prefill: username / nama lengkap / telepon diambil dari profil (userData);
+  // detail alamat (jalan, apartemen, kota, provinsi, negara) dari alamat tersimpan.
+  useEffect(() => {
+    const a = alamat[0];
+    setForm((f) => ({
+      ...f,
+      email: f.email || user?.email || currentUser?.email || "",
+      negara: a?.country || f.negara,
+      username: f.username || user?.username || "",
+      fullName: f.fullName || user?.name || currentUser?.name || "",
+      address: f.address || a?.address || "",
+      detail: f.detail || a?.detail || "",
+      city: f.city || a?.city || a?.wilayah || "",
+      province: f.province || a?.province || "",
+      phone: f.phone || user?.nohp || a?.nohp || a?.phone || "",
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alamat, currentUser]);
+
   const subtotal = items.reduce((acc, item) => acc + item.harga * item.qty, 0);
   const totalItem = items.reduce((acc, item) => acc + item.qty, 0);
 
   const updateForm = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  const hanyaAngka = (v) => v.replace(/\D/g, "");
 
-  const wajibDiisi = ["email", "negara", "firstName", "lastName", "address", "city", "province", "postalCode"];
+  const wajibDiisi = ["email", "negara", "fullName", "address", "city", "province", "phone"];
   const validateEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   const isFormValid = wajibDiisi.every((f) => form[f].trim() !== "") && validateEmail(form.email);
 
-  const handleLanjut = () => {
+  const handleLanjut = async () => {
     setSudahCobaSubmit(true);
-    if (isFormValid) navigate("/pembayaran/pilih", { state: { customer: form } });
+    if (!isFormValid) return;
+
+    // Data akun (username/nama/telepon) yang diisi di checkout tapi belum ada di
+    // profil -> tanya apakah mau disimpan ke dashboard (tidak menimpa yang sudah ada).
+    const kandidat = {};
+    if (!user?.username && form.username.trim()) kandidat.username = form.username.trim();
+    if (!user?.name && form.fullName.trim()) kandidat.name = form.fullName.trim();
+    if (!user?.nohp && form.phone.trim()) kandidat.nohp = form.phone.trim();
+
+    if (Object.keys(kandidat).length > 0) {
+      const res = await Swal.fire({
+        title: "Simpan ke profil akun?",
+        text: "Data akun yang kamu isi (username/nama/telepon) bisa disimpan ke dashboard.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Ya, simpan",
+        cancelButtonText: "Tidak",
+        confirmButtonColor: "#111827",
+        cancelButtonColor: "#6b7280",
+      });
+      if (res.isConfirmed) setUser((prev) => ({ ...prev, ...kandidat }));
+    }
+
+    navigate("/pembayaran/pilih", { state: { customer: form } });
   };
 
   const errorClass = (field) =>
     sudahCobaSubmit && form[field].trim() === ""
       ? "border-red-400 focus:border-red-500 focus:ring-red-100"
       : "border-ash focus:border-ink focus:ring-ink";
+
+  // Keranjang kosong -> tidak ada yang di-checkout.
+  if (items.length === 0) return <Navigate to="/keranjang" replace />;
+  // Belum ada alamat tersimpan -> arahkan ke dashboard untuk menambahkannya.
+  if (alamat.length === 0) return <Navigate to="/akun" replace state={{ perluAlamat: true }} />;
 
   return (
     <div
@@ -119,9 +167,9 @@ export default function Checkout() {
         <h1 className="text-xl font-bold tracking-[0.2em] text-ink">{NAMA_TOKO}</h1>
       </header>
 
-      <div className="mx-auto grid max-w-6xl grid-cols-1 md:grid-cols-2 md:gap-12">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 md:grid-cols-2 md:gap-0">
         {/* Kolom kiri: form checkout */}
-        <div className="px-6 py-8 md:px-0 md:py-10">
+        <div className="px-6 py-8 md:pl-0 md:pr-12 md:py-10 lg:pr-16">
           <div className="mx-auto max-w-md md:ml-auto md:mr-0">
             <nav className="mb-6 flex flex-wrap items-center justify-center gap-1.5 text-[11px] text-steel md:justify-start">
               {langkahCheckout.map((langkah, i) => (
@@ -200,17 +248,17 @@ export default function Checkout() {
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="text"
-                  placeholder="Nama depan"
-                  value={form.firstName}
-                  onChange={updateForm("firstName")}
-                  className={` border bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:ring-1 ${errorClass("firstName")}`}
+                  placeholder="Username"
+                  value={form.username}
+                  onChange={updateForm("username")}
+                  className=" border border-ash bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:border-ink focus:ring-1 focus:ring-ink"
                 />
                 <input
                   type="text"
-                  placeholder="Nama belakang"
-                  value={form.lastName}
-                  onChange={updateForm("lastName")}
-                  className={` border bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:ring-1 ${errorClass("lastName")}`}
+                  placeholder="Nama lengkap"
+                  value={form.fullName}
+                  onChange={updateForm("fullName")}
+                  className={` border bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:ring-1 ${errorClass("fullName")}`}
                 />
               </div>
 
@@ -224,6 +272,8 @@ export default function Checkout() {
               <input
                 type="text"
                 placeholder="Apartemen, unit, dll. (opsional)"
+                value={form.detail}
+                onChange={updateForm("detail")}
                 className="w-full border border-ash bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:border-ink focus:ring-1 focus:ring-ink"
               />
               <input
@@ -234,22 +284,13 @@ export default function Checkout() {
                 className={`w-full border bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:ring-1 ${errorClass("city")}`}
               />
 
-              <div className="grid grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  placeholder="Provinsi"
-                  value={form.province}
-                  onChange={updateForm("province")}
-                  className={` border bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:ring-1 ${errorClass("province")}`}
-                />
-                <input
-                  type="text"
-                  placeholder="Kode pos"
-                  value={form.postalCode}
-                  onChange={updateForm("postalCode")}
-                  className={` border bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:ring-1 ${errorClass("postalCode")}`}
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Provinsi"
+                value={form.province}
+                onChange={updateForm("province")}
+                className={`w-full border bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:ring-1 ${errorClass("province")}`}
+              />
 
               {/* 17. Input nomor telepon hanya menerima angka.
                     non-digit akan dihapus dengan replace(/\D/g, "")
@@ -260,11 +301,11 @@ export default function Checkout() {
                */}
               <input
                 type="tel"
-                placeholder="Telepon (opsional)"
+                placeholder="Telepon"
                 value={form.phone}
-                onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value.replace(/\D/g, "") }))}
+                onChange={(e) => setForm((f) => ({ ...f, phone: hanyaAngka(e.target.value) }))}
                 inputMode="numeric"
-                className="w-full border border-ash bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:border-ink focus:ring-1 focus:ring-ink"
+                className={`w-full border bg-white px-3 py-2.5 text-sm outline-none placeholder:text-steel focus:ring-1 ${errorClass("phone")}`}
               />
               <label className="flex items-center gap-2 pt-1 text-xs text-smoke">
                 <input type="checkbox" className="h-3.5 w-3.5 accent-ink" />
@@ -290,11 +331,12 @@ export default function Checkout() {
               >
                 <span aria-hidden="true">‹</span> Kembali ke keranjang
               </button>
-              {/* 20. Tombol Lanjutkan memanggil handleLanjut untuk validasi dan navigasi. */}
+              {/* 20. Tombol Lanjutkan nonaktif sampai form alamat pengiriman lengkap. */}
               <button
                 type="button"
                 onClick={handleLanjut}
-                className=" bg-ink px-6 py-2.5 border border-ink text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-ink active:scale-[0.98]"
+                disabled={!isFormValid}
+                className=" bg-ink px-6 py-2.5 border border-ink text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-ink active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ink disabled:hover:text-white"
               >
                 Lanjut ke pengiriman
               </button>
@@ -311,22 +353,22 @@ export default function Checkout() {
         </div>
 
         {/* Kolom kanan: ringkasan pesanan */}
-        <div className="border-t border-ash/60 px-6 py-8 md:border-t-0 md:border-l md:px-0 md:py-10">
+        <div className="border-t border-ash/60 px-6 py-8 md:border-t-0 md:border-l md:pl-12 md:pr-0 md:py-10 lg:pl-16">
           <div className="mx-auto max-w-md md:mr-auto md:ml-0">
             <ul className="space-y-4">
               {items.map((item) => (
                 <li key={item.id} className="flex items-center gap-4">
                   <div className="relative shrink-0">
-                    <img src={item.gambar} alt={item.nama} className="h-16 w-16 border border-ash object-cover" />
+                    <img src={item.gambar || undefined} alt={item.nama} className="h-16 w-16 border border-ash object-cover" />
                     <span className="absolute -left-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[11px] font-semibold text-white">
                       {item.qty}
                     </span>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-ink-soft">{item.nama}</p>
-                    <p className="text-xs text-smoke">{item.varian}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-ink-soft">{item.nama}</p>
+                    <p className="truncate text-xs text-smoke">{item.varian}</p>
                   </div>
-                  <span className="text-sm text-ink-soft">{formatRupiah(item.harga * item.qty)}</span>
+                  <span className="shrink-0 text-sm text-ink-soft">{formatRupiah(item.harga * item.qty)}</span>
                 </li>
               ))}
             </ul>

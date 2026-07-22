@@ -31,7 +31,15 @@ export default function StatusPembayaran() {
   const [showBatal, setShowBatal] = useState(false);
   const [alasanTerpilih, setAlasanTerpilih] = useState("");
 
-  const status = statusManual ?? (pesanan ? "berhasil" : null);
+  const status =
+    statusManual ??
+    (pesanan
+      ? pesanan.status === "pending"
+        ? "pending"
+        : pesanan.status === "failed"
+        ? "gagal"
+        : "berhasil"
+      : null);
 
   const cekUlang = async () => {
     setMengecekUlang(true);
@@ -88,6 +96,8 @@ export default function StatusPembayaran() {
                 className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border text-2xl transition-all duration-300 ${
                   status === "gagal"
                     ? "border-red-300 bg-red-50 text-red-700"
+                    : status === "pending"
+                    ? "border-amber-300 bg-amber-50 text-amber-700"
                     : "border-emerald-300 bg-emerald-50 text-emerald-700"
                 }`}
               >
@@ -95,16 +105,24 @@ export default function StatusPembayaran() {
                   <span className="h-6 w-6 animate-spin rounded-full border-2 border-steel border-t-transparent" />
                 ) : status === "gagal" ? (
                   "✕"
+                ) : status === "pending" ? (
+                  "⏳"
                 ) : (
                   "✅"
                 )}
               </div>
               <h2 className="mb-2 text-lg font-semibold text-ink">
-                {status === "gagal" ? "Pembayaran dibatalkan" : "Pembayaran berhasil"}
+                {status === "gagal"
+                  ? "Pembayaran dibatalkan"
+                  : status === "pending"
+                  ? "Menunggu pembayaran"
+                  : "Pembayaran berhasil"}
               </h2>
               <p className="mb-6 text-sm text-smoke">
                 {status === "gagal"
                   ? "Pembayaranmu telah dibatalkan. Kamu bisa mencoba membayar lagi kapan saja."
+                  : status === "pending"
+                  ? "Pesananmu sudah dibuat. Selesaikan pembayaran lewat halaman detail pesanan di akunmu."
                   : "Terima kasih! Pesananmu sudah kami terima dan akan segera diproses."}
               </p>
 

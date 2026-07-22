@@ -6,16 +6,34 @@ import { handleNoHp } from "../../utils/UserProfile/Profile";
 import useAlamat from "../../hooks/UserProfile/useAlamat"; 
 import { handleTambahAlamat } from "../../utils/UserProfile/Alamat"; 
 import { handleFotoProfilChange } from "../../utils/UserProfile/fotoprofile";
+import { useAuth } from "../../hooks/Login/useAuth";
 
 const UserProfile = ({ user, setUser }) => {
   const [formData, setFormData] = useState(user);
   const { alamat, setAlamat } = useAlamat();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
-    if (user && !formData?.username) {
+    if (user && !formData?.name) {
       setFormData(user);
     }
   }, [user]);
+
+  // Isi otomatis Nama Lengkap & Email dari akun yang login (dari register/login)
+  // bila profil dashboard masih kosong. Username SENGAJA tidak diisi otomatis —
+  // biarkan kosong sampai user mengisinya sendiri (username != nama lengkap).
+  useEffect(() => {
+    if (!currentUser) return;
+    if (user?.name && user?.email) return;
+    const next = {
+      ...user, // pertahankan username apa adanya (default kosong)
+      name: user?.name || currentUser.name || "",
+      email: user?.email || currentUser.email || "",
+    };
+    setFormData(next);
+    setUser(next); // persist -> SideNavbar & halaman lain ikut terisi
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,7 +110,7 @@ const UserProfile = ({ user, setUser }) => {
             <h3 className="text-sm font-black tracking-wider uppercase text-ink">Addresses</h3>
             <button 
               type="button"
-              onClick={() => handleTambahAlamat(alamat, setAlamat, alamat[0] || null)}
+              onClick={() => handleTambahAlamat(alamat, setAlamat, alamat[0] || null, { name: formData.name, phone: formData.nohp })}
               className="text-xs font-bold border border-ash/50 bg-cloud px-4 py-1.5 hover:bg-ash transition cursor-pointer"
             >
               {alamat.length === 0 ? 'Add' : 'Edit'}
@@ -117,7 +135,10 @@ const UserProfile = ({ user, setUser }) => {
                 </div>
                 <p className="text-steel font-medium text-xs">{alamat[0].phone || alamat[0].nohp}</p>
                 <p className="text-smoke leading-relaxed pt-1 text-xs">
-                  {alamat[0].detail}, {alamat[0].wilayah} ({alamat[0].country})
+                  {[alamat[0].address, alamat[0].detail, alamat[0].city, alamat[0].province]
+                    .filter(Boolean)
+                    .join(", ")}
+                  {alamat[0].country ? ` (${alamat[0].country})` : ""}
                 </p>
               </div>
             </div>
