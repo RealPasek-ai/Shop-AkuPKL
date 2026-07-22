@@ -29,7 +29,6 @@ const metodeBayar = [
 
 const opsiBank = ["BCA", "Mandiri", "BNI", "BRI"];
 const opsiEwallet = ["GoPay", "OVO", "DANA", "ShopeePay"];
-const opsiKartu = ["Visa", "Mastercard"];
 
 const alasanBatal = [
   "Salah memilih metode pembayaran",

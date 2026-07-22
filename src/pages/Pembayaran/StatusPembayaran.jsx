@@ -27,7 +27,6 @@ export default function StatusPembayaran() {
   } = useFetch(() => fetchStatusPesanan(orderId), [orderId]);
 
   const [statusManual, setStatusManual] = useState(null); // null = ikut hasil fetch (dianggap "berhasil")
-  const [mengecekUlang, setMengecekUlang] = useState(false);
   const [showBatal, setShowBatal] = useState(false);
   const [alasanTerpilih, setAlasanTerpilih] = useState("");
 
@@ -40,12 +39,6 @@ export default function StatusPembayaran() {
         ? "gagal"
         : "berhasil"
       : null);
-
-  const cekUlang = async () => {
-    setMengecekUlang(true);
-    await refetch();
-    setMengecekUlang(false);
-  };
 
   const konfirmasiBatal = () => {
     setStatusManual("gagal");
@@ -101,15 +94,7 @@ export default function StatusPembayaran() {
                     : "border-emerald-300 bg-emerald-50 text-emerald-700"
                 }`}
               >
-                {mengecekUlang ? (
-                  <span className="h-6 w-6 animate-spin rounded-full border-2 border-steel border-t-transparent" />
-                ) : status === "gagal" ? (
-                  "✕"
-                ) : status === "pending" ? (
-                  "⏳"
-                ) : (
-                  "✅"
-                )}
+                {status === "gagal" ? "✕" : status === "pending" ? "⏳" : "✅"}
               </div>
               <h2 className="mb-2 text-lg font-semibold text-ink">
                 {status === "gagal"
